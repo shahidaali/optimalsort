@@ -1,0 +1,14 @@
+.wrap {
+    min-height: 100vh;
+}
+.optimalsort-step {
+    display: none;
+}
+.questionnaire .error {
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.7rem;
+    display: block;
+    color: #da1f47;
+    margin-bottom: 0.5rem;
+}
