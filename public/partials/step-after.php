@@ -9,7 +9,7 @@
                         <div class="questionnaire-question question-wrapper" id="question_347359">
                            <label id="question_label_347359" class="questionnaire-question__label"><label class="questionnaire-question__optional-label">Optional</label>
                            <div class="question-markdown">
-                              <p>If Applicable,<br>Please provide details on your Other Financial Planning Goals you were considering</p>
+                              <p><?php echo Optimalsort_Utill::get_option('financial_label', ''); ?></p>
                            </div>
                            </label>
                            <div class="">

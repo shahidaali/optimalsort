@@ -132,7 +132,7 @@ class Optimalsort_Public {
 	 * @access   private
 	 */
 	public function register_post_type() {
-		register_post_type( 'optimalsort_cards', array(
+		register_post_type( Optimalsort_Utill::get_post_type_name(), array(
 			'labels' => array(
 				'name' => __( 'Optimal Sort Cards', 'optimalsort' ),
 				'singular_name' => __( 'Optimal Sort Card', 'optimalsort' ),
@@ -158,7 +158,7 @@ class Optimalsort_Public {
 		    'menu_name' => __( 'Categories' ),
 		);    
 		 
-		register_taxonomy('optimalsort_cats', array('optimalsort_cards'), array(
+		register_taxonomy(Optimalsort_Utill::get_taxonomy_name(), array('optimalsort_cards'), array(
 		    'hierarchical' => true,
 		    'labels' => $labels,
 		    'show_ui' => true,
@@ -212,7 +212,7 @@ class Optimalsort_Public {
 					'id' => $post_id,
 					'survey_id' => 1,
 					'label' => get_the_title(),
-					'description' => esc_attr(get_the_excerpt()),
+					'description' => esc_attr(get_the_content()),
 					'image_url' => $thumbnail,
 					'uploaded_image_thumbnail_url' => $thumbnail,
 					'uploaded_image' => $thumbnail_name,
@@ -224,7 +224,7 @@ class Optimalsort_Public {
 		endif;
 
 		$terms = get_terms( array(
-		    'taxonomy' => 'optimalsort_cats',
+		    'taxonomy' => Optimalsort_Utill::get_taxonomy_name(),
 		    'hide_empty' => false,
 		) );
 
@@ -257,6 +257,11 @@ class Optimalsort_Public {
 			'custom_color' => '',
 			'panel_participant' => NULL,
 		];
+
+		if(empty(Optimalsort_Utill::get_session('email', ''))) {
+			Optimalsort_Utill::set_session('step', 'welcome');
+		}
+		
 		//Optimalsort_Utill::set_session('step', 'welcome');
 
 		$form_data = [
@@ -268,8 +273,6 @@ class Optimalsort_Public {
 			'sorted_cards' => Optimalsort_Utill::get_session('sorted_cards', []),
 			'step' => Optimalsort_Utill::get_session('step', 'welcome'),
 		];
-
-		print_r($form_data);
 
 		ob_start();
 		include_once 'partials/shortcode.php';
@@ -338,16 +341,38 @@ class Optimalsort_Public {
 			}
 
 			if(!empty($form_data['completed']) && $form_data['completed']) {
-				Optimalsort_Utill::reset_session();
+				Optimalsort_Utill::set_session('completed_time', date('Y-m-d H:i:s'));
+
+				if($this->step_completed()) {
+					Optimalsort_Utill::reset_session();
+
+					$json_data = [
+						'status' => 'success',
+						'message' => 'Data saved',
+						'data' => [
+							'form_data' => $form_data,
+						]
+					];
+				} else {
+					$json_data = [
+						'status' => 'error',
+						'message' => 'Error sending emails.',
+						'data' => [
+							'form_data' => $form_data,
+						]
+					];
+				}
+			} else {
+				$json_data = [
+					'status' => 'success',
+					'message' => 'Data saved',
+					'data' => [
+						'form_data' => $form_data,
+					]
+				];
 			}
 
-			$json_data = [
-				'status' => 'success',
-				'message' => 'Data saved',
-				'data' => [
-					'form_data' => $form_data,
-				]
-			];
+			
 		}
 
 		$json_data['data']['request'] = $_REQUEST;
@@ -357,4 +382,148 @@ class Optimalsort_Public {
 		exit();
 	}
 
+	/**
+	 * Register the stylesheets for the public-facing side of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function step_completed() {
+		$client_emmail_status = true;
+		if(Optimalsort_Utill::get_session('email_copy', "Yes") == "Yes") {
+			$client_emmail_status = $this->send_client_email();
+		}
+
+		$admin_emmail_status = $this->send_admin_email();
+
+		if( $client_emmail_status &&  $admin_emmail_status ) {
+			return true;
+		}
+	}
+
+	/**
+	 * Register the stylesheets for the public-facing side of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function send_client_email() {
+		$client_cc_emails = explode(",", Optimalsort_Utill::get_option('client_cc_emails', ''));
+		$client_cc_emails = array_map("trim", $client_cc_emails);
+
+		$client_email_subject = $this->filter_tokens(Optimalsort_Utill::get_option('client_email_subject', ''));
+		$client_email_template = $this->filter_tokens(wpautop(Optimalsort_Utill::get_option('client_email_template', '')));
+		
+		$to = Optimalsort_Utill::get_session('email', "");
+		$subject = $client_email_subject;
+		$body = $client_email_template;
+		$headers = array('Content-Type: text/html; charset=UTF-8;');
+
+		$email_status = wp_mail( $to, $subject, $body, $headers );
+
+		if( $email_status ) {
+			return true;
+		}
+	}
+
+	/**
+	 * Register the stylesheets for the public-facing side of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function send_admin_email() {
+		$admin_email = explode(",", Optimalsort_Utill::get_option('admin_email', ''));
+		$admin_email = array_map("trim", $admin_email);
+
+		if(empty($admin_email)) {
+			return false;
+		}
+
+		$admin_email_subject = $this->filter_tokens(Optimalsort_Utill::get_option('admin_email_subject', ''));
+		$admin_email_template = $this->filter_tokens(wpautop(Optimalsort_Utill::get_option('admin_email_template', '')));
+		
+		$to = $admin_email[0];
+		$subject = $admin_email_subject;
+		$body = $admin_email_template;
+		$headers = array('Content-Type: text/html; charset=UTF-8;');
+
+		$email_status = wp_mail( $to, $subject, $body, $headers );
+		print_r($email_status);
+
+		if( $email_status ) {
+			return true;
+		}
+	}
+
+	/**
+	 * Register the stylesheets for the public-facing side of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function filter_tokens($content) {
+		$sorted_cards = Optimalsort_Utill::get_session('sorted_cards', []);
+		$cards_list = $this->create_cards_html($sorted_cards, "list");
+		$cards_pictures = $this->create_cards_html($sorted_cards);
+
+		$tokens = [
+			'[DATE_TIME]' => Optimalsort_Utill::get_session('completed_time', ""),
+			'[NAME]' => Optimalsort_Utill::get_session('name', ""),
+			'[EMAIL]' => Optimalsort_Utill::get_session('email', ""),
+			'[SORTED_CARDS_LIST]' => $cards_list,
+			'[SORTED_CARDS_PICTURES]' => $cards_pictures,
+		];
+		
+		$content = str_replace(array_keys($tokens), array_values($tokens), $content);
+		return $content;
+	}
+
+	/**
+	 * Register the stylesheets for the public-facing side of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function create_cards_html($sorted_cards, $type = "pictures") {
+		$html = "";
+		foreach ($sorted_cards as $term_id => $post_ids) {
+			$category = get_term( $term_id, Optimalsort_Utill::get_taxonomy_name() );
+
+			$args = array(
+			    'post_type' => Optimalsort_Utill::get_post_type_name(),
+			    'posts_per_page' => -1,
+			    'orderby' => 'post__in', 
+			    'post__in' => $post_ids,
+			); 
+
+			$arr_posts = new WP_Query($args);
+
+			$cards = "";
+			if ($arr_posts->have_posts()) : 
+
+				$counter = 0;
+				while ($arr_posts->have_posts()) : $arr_posts->the_post();
+
+					$post_id = get_the_ID();
+					$thumbnail = get_the_post_thumbnail_url(get_the_ID(), 'full');
+
+					$cards .= '<tr>';
+						if( $type =="pictures" && trim($category->name) != "Not Applicable" ) {
+							$cards .= '<td width="30%"><img src="'. $thumbnail .'" alt="'. get_the_title() .'" /></td>';
+							$cards .= '<td width="30%">'. get_the_title() .'</td>';
+							$cards .= '<td width="40%">'. get_the_excerpt() .'</td>';
+						} else {
+							$cards .= '<td>'. get_the_title() .'</td>';
+						}
+					$cards .= '</tr>';
+
+				endwhile;
+				wp_reset_postdata();
+			endif;
+
+			$html .= '<p>'. $category->description .'</p>';
+			$html .= '<p><strong>'. $category->name .'</strong></p>';
+			$html .= '<table border="2" cellpadding="5" cellspacing="0" width="100%">';
+			$html .=  $cards;
+			$html .= '</table>';
+		}
+
+		return $html;
+	}
 }

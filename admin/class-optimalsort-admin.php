@@ -162,17 +162,15 @@ class Optimalsort_Admin {
 	        return;
 	    }
 
-	    $plugin_enabled = isset($_POST['plugin_enabled']) ? $_POST['plugin_enabled'] : 0;
-	    $show_in_excerpt = isset($_POST['show_in_excerpt']) ? $_POST['show_in_excerpt'] : 0;
+	    $old_options = Optimalsort_Utill::get_options();
+	    $optimalsort_options = isset($_POST['optimalsort']) ? $_POST['optimalsort'] : [];
 
-	    // Create option array to save
-	    $options = [
-	    	'plugin_enabled' => $plugin_enabled,
-	    	'show_in_excerpt' => $show_in_excerpt
-	    ];
+		$optimalsort_options = array_merge($old_options, $optimalsort_options);
 
 	    // Update options
-	    update_option( 'optimalsort_options',  $options );
+	    update_option( 'optimalsort_options',  $optimalsort_options );
+
+	    Optimalsort_Utill::reset_options($optimalsort_options);
 
 	    return [
 	    	'status' => 'success',

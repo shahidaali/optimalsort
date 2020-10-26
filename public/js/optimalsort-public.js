@@ -2,7 +2,40 @@
 	'use strict';
 	// console.log(optimalsortOptions);
 
-	console.log();
+	var Global_Response_Handler = {
+	  response : null,
+	  init : function( response ) {
+	    this.response = response;
+	    return this;
+	  },
+	  is_success : function() {
+	    return this.response.status == 'success';
+	  },
+	  is_error : function() {
+	    return this.response.status == 'error';
+	  },
+	  message : function() {
+	    return this.response.message;
+	  },
+	  status : function() {
+	    return this.response.status;
+	  },
+	  data : function() {
+	    return ( this.response.data !== undefined ) 
+	      ? this.response.data
+	      : {};
+	  },
+	  get_data : function(key, default_value) {
+	    return ( this.response.data[ key ] !== undefined ) 
+	      ? this.response.data[ key ]
+	      : default_value;
+	  },
+	  get_request : function(key, default_value) {
+	    return ( this.response.request[ key ] !== undefined ) 
+	      ? this.response.request[ key ]
+	      : default_value;
+	  }
+	};
 
 	var OptimalSortPlugin = {
 		wrapper: $('.optimalsort-steps'),
@@ -119,12 +152,20 @@
                     form_data: data.form_data,
                 },
 				success: function(response) {
-					if(data.doNextStep) {
-						_this.doActiveStep(data.nextStep);
+					var res = Global_Response_Handler.init(response);
+					if( res.is_success() ) {
+						if(data.doNextStep) {
+							_this.doActiveStep(data.nextStep);
+						}
+						if(data.doRedirect) {
+							location.reload();
+						}
+					} else {
+						alert(res.message());
 					}
-					if(data.doRedirect) {
-						location.reload();
-					}
+				},
+				error: function() {
+					alert("Error processing request. Please contact support.");
 				}
 			}) 
 		},

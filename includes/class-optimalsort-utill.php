@@ -40,6 +40,26 @@ class Optimalsort_Utill {
 	protected static $options = [];
 
 	/**
+	 * The loader that's responsible for maintaining and registering all hooks that power
+	 * the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      Optimalsort_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 */
+	protected static $post_type_name = "optimalsort_cards";
+
+	/**
+	 * The loader that's responsible for maintaining and registering all hooks that power
+	 * the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      Optimalsort_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 */
+	protected static $taxonomy_name = "optimalsort_cats";
+
+	/**
 	 * Define the core functionality of the plugin.
 	 *
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -68,12 +88,55 @@ class Optimalsort_Utill {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function get_option($name, $default = null) {
-		if( empty(self::$options) ) {
-			self::$options = get_option('optimalsort_options', true);
+	public static function get_post_type_name() {
+		return self::$post_type_name;
+	}
+
+	/**
+	 * Run the loader to execute all of the hooks with WordPress.
+	 *
+	 * @since    1.0.0
+	 */
+	public static function get_taxonomy_name() {
+		return self::$taxonomy_name;
+	}
+
+	/**
+	 * Run the loader to execute all of the hooks with WordPress.
+	 *
+	 * @since    1.0.0
+	 */
+	public static function reset_options($options = []) {
+		$options = $options ? $options : get_option('optimalsort_options', true);
+		if(empty($options) || !is_array($options)) {
+			$options = [];
 		}
 
-		return self::get_data(self::$options, $name, $default);
+		self::$options = $options;
+		return self::$options;
+	}
+
+	/**
+	 * Run the loader to execute all of the hooks with WordPress.
+	 *
+	 * @since    1.0.0
+	 */
+	public static function get_options() {
+		if( empty(self::$options) ) {
+			self::reset_options();
+		}
+
+		return self::$options;
+	}
+
+	/**
+	 * Run the loader to execute all of the hooks with WordPress.
+	 *
+	 * @since    1.0.0
+	 */
+	public static function get_option($name, $default = null) {
+		$options = self::get_options();
+		return self::get_data($options, $name, $default);
 	}
 
 	/**
@@ -123,7 +186,9 @@ class Optimalsort_Utill {
 	 * @since    1.0.0
 	 */
 	public static function get_data($data, $key, $default = null) {
-		return isset($data[$key]) ? $data[$key] : $default;
+		return isset($data[$key]) 
+			? (is_string($data[$key]) ? wp_kses_post(stripslashes($data[$key])) : $data[$key]) 
+			: $default;
 	}
 	
 	/**

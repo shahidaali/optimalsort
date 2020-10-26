@@ -7,9 +7,7 @@
                   <div class="page page-left-appear-done page-left-enter-done">
                      <div class="page">
                         <div class="survey-message questionnaire-title">
-                           <h1>Make Work Optional</h1>
-                           <p>Welcome to our Interactive Activity that will help you determine some of your high level <strong>Goals</strong>, it may even help you consider goals that aren't in the questions.</p>
-                           <p>The activity shouldn't take longer than <strong>5 to 10 minutes</strong> to complete.</p>
+                           <?php echo wpautop(Optimalsort_Utill::get_option('welcome_text', "")) ?>
                         </div>
                      </div>
                   </div>

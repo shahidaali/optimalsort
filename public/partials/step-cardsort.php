@@ -77,7 +77,7 @@
       <div class="cs-header">
          <div class="cs-info-banners">
          </div>
-         <a class="cs-logo" href="#"><img src="//assets.optimalworkshop.com/prod/logos/optimalsort-with-text-c35dc671544fa7c030ca490017a534cdd02620bafbe69be745e619dae7544477.svg" /></a>
+         <?php echo Optimalsort_Utill::get_option('header_text', ""); ?>
          
          <div class="cs-controls">
             <button class="cs-instructions-btn btn btn-default">
@@ -119,7 +119,7 @@
         <textarea id="comment-text" class="cs-comment-text form-control"><?php echo $form_data['comment'] ?></textarea>
         <br>
         <p class="text-muted tech-support">
-          <small>Having a technical issue? Let our friendly Tech Support team know at <a class="primary-link" href="mailto:support@optimalworkshop.com?body=%0A%0A%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%0APlease%20add%20your%20message%20above%20this%20line%20and%20attach%20any%20screenshots.%0Acard-sort-url%3A%20https%3A%2F%2Fmakeworkoptional.optimalworkshop.com%2Foptimalsort%2Feyx5vne0-0-0-0-0-0-0%2Fsort%2F8629588&amp;subject=Card%20Sort%20Technical%20Support">support@optimalworkshop.com</a>
+          <small>Having a technical issue? Let our friendly Tech Support team know at <a class="primary-link" href="mailto:<?php echo Optimalsort_Utill::get_option('customer_support_email', ""); ?>"><?php echo Optimalsort_Utill::get_option('customer_support_email', ""); ?></a>
           </small>
         </p>
       </div>
@@ -138,14 +138,7 @@
         </div>
         <div class="modal-body">
           <div class="cs-instructions">
-              <p>Take a look at the list of items on the left. We'd like you to sort all those items into groups that make sense to you.</p>
-
-<p>Use the groups provided by dragging and dropping an item from the left into the space on the right.</p>
-
-<p>Use the Info button located at the top right of each picture to get more information about the topic.</p>
-
-<p>There is no right or wrong answer. Just do what comes naturally. When you're done click "Finished" at the top right.</p>
-
+              <?php echo wpautop(Optimalsort_Utill::get_option('instructions_text', "")); ?>
           </div>
         </div>
         <div class="modal-footer">
@@ -163,7 +156,8 @@
       </div>
       <div class="modal-body">
           <div class="alert alert-danger" id="cardSortErrorResponse"></div>
-          You can try closing this popup and submitting your sort again, or you can copy the text from the box below and email it to <a href="mailto:support@optimalworkshop.com?subject=OptimalSort%20Participant%20Submission">support@optimalworkshop.com</a>
+
+          You can try closing this popup and submitting your sort again, or you can copy the text from the box below and email it to <a href="mailto:<?php echo Optimalsort_Utill::get_option('customer_support_email', ""); ?>?subject=OptimalSort%20Participant%20Submission"><?php echo Optimalsort_Utill::get_option('customer_support_email', ""); ?></a>
           <br><br>
           <textarea id="cardSortJsonTextarea" class="form-control"></textarea>
       </div>

@@ -29,4 +29,17 @@
 	 * be doing this, we should try to minimize doing that in our own work.
 	 */
 
+
+	 $(document).on('click', '.os-tabs a', function(e){
+	 	e.preventDefault();
+	 	$('.os-tabs li').removeClass('active');
+	 	$(this).closest('li').addClass('active');
+
+	 	$('.os-tab-content').removeClass('active');
+	 	$($(this).attr('href')).addClass('active');
+	 });
+
+	 // setTimeout(function(){
+	 // 	tinymce.init({ selector: '#' + editor_id});
+	 // }, 500)
 })( jQuery );
